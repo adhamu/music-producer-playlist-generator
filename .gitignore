@@ -1,3 +1,4 @@
 *.mp3
 *.m3u
 credentials.py*
+__pycache__
