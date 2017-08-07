@@ -14,6 +14,7 @@ import eyed3
 import math
 import glob
 from pathlib import Path
+from libpytunes import Library
 import credentials
 
 token = credentials.auth['token']
@@ -27,6 +28,7 @@ RECORD_MARKER = "#EXTINF"
 
 target_producer = None
 mp3_path = None
+itunes_library = None
 
 os.chdir(os.getcwd())
 
@@ -108,6 +110,9 @@ def _usage():
     msg += "%5s,\t%s==%s\n" % (
         "-m", "--mp3-path", "directory where your mp3s live"
     )
+    msg += "%5s,\t%s==%s\n" % (
+        "-i", "--itunes-library-xml", "Absolute path to iTunes library XML file (overrides mp3_path)"
+    )
     msg += "%5s,\t%s==\t%s" % (
         "-h", "--help", "display this help and exit"
     )
@@ -126,8 +131,8 @@ if __name__ == "__main__":
         _usage()
         sys.exit(1)
 
-    options = 'pm'
-    long_options = ['producer-name', 'mp3-path']
+    options = 'pmi'
+    long_options = ['producer-name', 'mp3-path', 'itunes-library-xml']
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], options, long_options)
@@ -150,24 +155,54 @@ if __name__ == "__main__":
     except:
         pass
 
+    try:
+        itunes_library = Path(args[2])
+    except:
+        pass
+
     if target_producer is None or mp3_path is None:
         _usage()
         sys.exit(1)
 
-    if not mp3_path.is_dir():
-        raise Exception('mp3_path is not a directory')
-        sys.exit(1)
+    if itunes_library is None:
+        if not mp3_path.is_dir():
+            raise Exception('mp3_path is not a directory')
+            sys.exit(1)
+        else:
+            mp3_path = os.path.realpath(mp3_path)
     else:
-        mp3_path = os.path.realpath(mp3_path)
+        if not itunes_library.is_file():
+            raise Exception('itunes library doesn\'t exist')
+            sys.exit(1)
+        else:
+            itunes_library = os.path.realpath(itunes_library)
 
     print('Gonna try and find songs produced by ' + target_producer)
-    for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
-        song_info = search_song(file)
-        if song_info is not None:
-            lookup_song_info(
-                song_info['artist'],
-                song_info['api_path'],
-                song_info['track_name'],
-                song_info['track_length'],
-                song_info['mp3_path']
-            )
+
+    if itunes_library is None:
+        print('Searching through path of MP3s')
+        for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
+            exit(file)
+            song_info = search_song(file)
+            if song_info is not None:
+                lookup_song_info(
+                    song_info['artist'],
+                    song_info['api_path'],
+                    song_info['track_name'],
+                    song_info['track_length'],
+                    song_info['mp3_path']
+                )
+    else:
+        print('Searching through iTunes library')
+        l = Library(itunes_library)
+        for id, song in l.songs.items():
+            if song:
+                song_info = search_song('/' + song.location)
+                if song_info is not None:
+                    lookup_song_info(
+                        song_info['artist'],
+                        song_info['api_path'],
+                        song_info['track_name'],
+                        song_info['track_length'],
+                        song_info['mp3_path']
+                    )
