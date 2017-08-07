@@ -35,7 +35,7 @@ def search_songs():
     """Search for tracks and return api path."""
     search_url = base_url + "/search"
 
-    for file in glob.glob("**/*.mp3", recursive=True):
+    for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
         mp3_file = file
         audiofile = eyed3.load(mp3_file)
         artist = audiofile.tag.album_artist
@@ -155,6 +155,8 @@ if __name__ == "__main__":
     if not mp3_path.is_dir():
         raise Exception('mp3_path is not a directory')
         sys.exit(1)
+    else:
+        mp3_path = os.path.realpath(mp3_path)
 
     print('Gonna try and find songs produced by ' + target_producer)
     song_info = search_songs()
