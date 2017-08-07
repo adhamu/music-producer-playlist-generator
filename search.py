@@ -68,19 +68,21 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     request = requests.get(search_url, data={}, headers=headers)
     response = request.json()
 
-    producer = response['response']['song']['producer_artists'][0]
-
-    if producer['name'] in target_producer:
-        print('\t\t' + producer['name'] + ' produced ' + track_name + '. Gonna add it to a playlist')
-        append_to_playlist(
-            'Produced by ' + target_producer,
-            mp3_path,
-            track_length,
-            artist,
-            track_name
-        )
+    if response['response']['song']['producer_artists'][0]['name']:
+        producer = response['response']['song']['producer_artists'][0]['name']
+        if producer in target_producer:
+            print('\t\t' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
+            append_to_playlist(
+                'Produced by ' + target_producer,
+                mp3_path,
+                track_length,
+                artist,
+                track_name
+            )
+        else:
+            print('\t\tDidn\'t match the producer we were searching for')
     else:
-        print('\t\tDidn\'t match the producer we were searching for')
+        print('\t\tCouldn\'t find the producer for this track')
 
 
 def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name):
