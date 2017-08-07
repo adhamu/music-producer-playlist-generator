@@ -43,7 +43,7 @@ def search_song(file):
     artist = audiofile.tag.album_artist
     track_name = audiofile.tag.title
     track_length = math.ceil(audiofile.info.time_secs)
-    search_term = artist + ' ' + track_name
+    search_term = str(artist) + ' ' + str(track_name)
     data = {'q': search_term}
     request = requests.get(search_url, data=data, headers=headers)
     response = request.json()
