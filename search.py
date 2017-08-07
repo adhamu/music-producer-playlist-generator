@@ -14,10 +14,12 @@ import eyed3
 import math
 import glob
 from pathlib import Path
+import credentials
 
+token = credentials.auth['token']
 base_url = "https://api.genius.com"
 headers = {
-    'Authorization': 'Bearer '
+    'Authorization': 'Bearer ' + token
 }
 
 FORMAT_DESCRIPTOR = "#EXTM3U"
