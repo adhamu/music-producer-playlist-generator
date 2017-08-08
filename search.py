@@ -153,7 +153,7 @@ if __name__ == "__main__":
     producer_list = target_producers.split('|')
     mp3_path = Path(args.m)
 
-    if Path(args.i) is None:
+    if args.i is None:
         if not mp3_path.is_dir():
             raise Exception('mp3_path is not a directory')
             sys.exit(1)
