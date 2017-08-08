@@ -87,20 +87,29 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     translator = str.maketrans('', '', string.punctuation)
 
     if len(response['response']['song']['producer_artists']):
-        for producer in response['response']['song']['producer_artists']:
-            producer_name = producer['name'].translate(translator)
-            result = (
-                [c for c in producer_list if producer_name in c.translate(translator)] + [None]
-            )[0]
-            if result:
-                append_to_playlist(
-                    'Produced by ' + result,
-                    mp3_path,
-                    track_length,
-                    artist,
-                    track_name
-                )
-                break
+
+        actual_producers = response['response']['song']['producer_artists']
+
+        producer_list = [
+            str(producer['name'].translate(translator).lower())
+            for producer in actual_producers
+        ]
+
+        matches = [
+            c.translate(translator).lower()
+            for c in target_producer_list if str(c) in str(producer_list)
+        ]
+
+        if matches:
+            producer_name = matches[0]
+            append_to_playlist(
+                'Produced by ' + producer_name,
+                mp3_path,
+                track_length,
+                artist,
+                track_name
+            )
+
     else:
         print(Fore.RED + 'Couldn\'t find any producers for this track')
 
@@ -162,7 +171,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     target_producers = args.p
-    producer_list = target_producers.split('|')
+    target_producer_list = target_producers.split('|')
     mp3_path = Path(args.m)
 
     if args.i is None:
