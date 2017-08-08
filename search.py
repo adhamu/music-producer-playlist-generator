@@ -13,6 +13,7 @@ import requests
 import eyed3
 import math
 import glob
+import string
 import credentials
 from pathlib import Path
 from libpytunes import Library
@@ -72,7 +73,8 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
 
     if len(response['response']['song']['producer_artists']):
         for producer in response['response']['song']['producer_artists']:
-            if producer['name'] in target_producer:
+            punctuation_translator = str.maketrans('', '', string.punctuation)
+            if producer['name'].translate(punctuation_translator) in target_producer.translate(punctuation_translator):
                 print('== ' + producer['name'] + ' produced ' + track_name + '. Adding to playlist')
                 append_to_playlist(
                     'Produced by ' + target_producer,
