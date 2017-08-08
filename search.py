@@ -6,6 +6,7 @@ Searches a directory of MP3s and creates a playlist based on producer.
 Uses genius.com's API.
 """
 
+import re
 import os
 import sys
 import requests
@@ -32,6 +33,8 @@ target_producer_list = None
 mp3_path = None
 itunes_library = None
 
+strip_out_excess_song_info = re.compile(r"^(.*)((\(?.)(ft|feat))", re.IGNORECASE)
+
 
 def search_song(file):
     """Search for tracks and return api path."""
@@ -44,6 +47,12 @@ def search_song(file):
     track_name = audiofile.tag.title
     track_length = math.ceil(audiofile.info.time_secs)
     search_term = str(artist) + ' ' + str(track_name)
+
+    search_modified = re.search(strip_out_excess_song_info, search_term)
+
+    if search_modified is not None and search_modified.group(1):
+        search_term = search_modified.group(1)
+
     data = {'q': search_term}
     request = requests.get(search_url, data=data, headers=headers)
     response = request.json()
