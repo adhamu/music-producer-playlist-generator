@@ -27,7 +27,8 @@ headers = {
 FORMAT_DESCRIPTOR = "#EXTM3U"
 RECORD_MARKER = "#EXTINF"
 
-target_producer = None
+target_producers = None
+target_producer_list = None
 mp3_path = None
 itunes_library = None
 
@@ -71,13 +72,15 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     request = requests.get(search_url, data={}, headers=headers)
     response = request.json()
 
+    translator = str.maketrans('', '', string.punctuation)
+
     if len(response['response']['song']['producer_artists']):
         for producer in response['response']['song']['producer_artists']:
-            translator = str.maketrans('', '', string.punctuation)
-            if producer['name'].translate(translator) in target_producer.translate(translator):
-                print('== ' + producer['name'] + ' produced ' + track_name + '. Adding to playlist')
+            result = ([c for c in producer_list if producer['name'].translate(translator) in c.translate(translator)] + [None])[0]
+            if result:
+                print('== ' + result + ' produced ' + track_name + '. Adding to playlist')
                 append_to_playlist(
-                    'Produced by ' + target_producer,
+                    'Produced by ' + result,
                     mp3_path,
                     track_length,
                     artist,
@@ -153,7 +156,8 @@ if __name__ == "__main__":
             sys.exit(1)
 
     try:
-        target_producer = args[0]
+        target_producers = args[0]
+        producer_list = target_producers.split('|')
     except:
         pass
 
@@ -167,7 +171,7 @@ if __name__ == "__main__":
     except:
         pass
 
-    if target_producer is None or mp3_path is None:
+    if target_producers is None or mp3_path is None:
         _usage()
         sys.exit(1)
 
@@ -184,8 +188,7 @@ if __name__ == "__main__":
         else:
             itunes_library = os.path.realpath(itunes_library)
 
-    print('Gonna try and find songs produced by ' + target_producer)
-
+    print('Will create playlists for these producers: ', target_producers.split('|'))
     if itunes_library is None:
         print('Searching through path of MP3s')
         for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
