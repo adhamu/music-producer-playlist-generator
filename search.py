@@ -78,6 +78,7 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     translator = str.maketrans('', '', string.punctuation)
 
     if len(response['response']['song']['producer_artists']):
+        exit(type(response['response']['song']['producer_artists']))
         for producer in response['response']['song']['producer_artists']:
             producer_name = producer['name'].translate(translator)
             result = (
