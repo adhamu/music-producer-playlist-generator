@@ -70,11 +70,10 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     request = requests.get(search_url, data={}, headers=headers)
     response = request.json()
 
-    print('== ' + track_name)
     if len(response['response']['song']['producer_artists']):
         for producer in response['response']['song']['producer_artists']:
-            if producer in target_producer:
-                print('== ' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
+            if producer['name'] in target_producer:
+                print('== ' + producer['name'] + ' produced ' + track_name + '. Adding to playlist')
                 append_to_playlist(
                     'Produced by ' + target_producer,
                     mp3_path,
@@ -188,7 +187,6 @@ if __name__ == "__main__":
     if itunes_library is None:
         print('Searching through path of MP3s')
         for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
-            exit(file)
             song_info = search_song(file)
             if song_info is not None:
                 lookup_song_info(
