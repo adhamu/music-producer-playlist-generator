@@ -97,12 +97,12 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
 
         matches = [
             c.translate(translator).lower()
-            for c in target_producer_list if str(c) in str(producer_list)
+            for c in target_producer_list if str(c) in producer_list
         ]
 
         if matches:
             append_to_playlist(
-                'Produced by ' + matches[0].title(),
+                'Produced by ' + str(matches[0]).title(),
                 mp3_path,
                 track_length,
                 artist,
