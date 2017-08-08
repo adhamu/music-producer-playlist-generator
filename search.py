@@ -13,9 +13,9 @@ import requests
 import eyed3
 import math
 import glob
+import credentials
 from pathlib import Path
 from libpytunes import Library
-import credentials
 
 token = credentials.auth['token']
 base_url = "https://api.genius.com"
@@ -71,18 +71,19 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     response = request.json()
 
     if len(response['response']['song']['producer_artists']):
-        producer = response['response']['song']['producer_artists'][0]['name']
-        if producer in target_producer:
-            print('==' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
-            append_to_playlist(
-                'Produced by ' + target_producer,
-                mp3_path,
-                track_length,
-                artist,
-                track_name
-            )
-        else:
-            print('==Didn\'t match the producer we were searching for')
+        for producer in response['response']['song']['producer_artists']:
+            if producer in target_producer:
+                print('==' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
+                append_to_playlist(
+                    'Produced by ' + target_producer,
+                    mp3_path,
+                    track_length,
+                    artist,
+                    track_name
+                )
+                break
+            else:
+                print('==Didn\'t match the producer we were searching for')
     else:
         print('==Couldn\'t find the producer for this track')
 
