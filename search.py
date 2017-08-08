@@ -33,7 +33,7 @@ target_producer_list = None
 mp3_path = None
 itunes_library = None
 
-strip_out_excess_song_info = re.compile(r"^(.*)((\(?.)(ft|feat))", re.IGNORECASE)
+strip_out_excess_song_info = re.compile(r"^(.*)((\(?.)(ft|feat|prod))", re.IGNORECASE)
 
 
 def search_song(file):
