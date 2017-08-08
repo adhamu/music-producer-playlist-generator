@@ -8,21 +8,20 @@ Uses genius.com's API.
 
 import os
 import sys
-import getopt
 import requests
 import eyed3
 import math
 import glob
 import string
 import credentials
+import argparse
 from pathlib import Path
 from libpytunes import Library
 from colorama import Fore, Style
 
-token = credentials.auth['token']
 base_url = "https://api.genius.com"
 headers = {
-    'Authorization': 'Bearer ' + token
+    'Authorization': 'Bearer ' + credentials.auth['token']
 }
 
 FORMAT_DESCRIPTOR = "#EXTM3U"
@@ -32,8 +31,6 @@ target_producers = None
 target_producer_list = None
 mp3_path = None
 itunes_library = None
-
-os.chdir(os.getcwd())
 
 
 def search_song(file):
@@ -117,85 +114,55 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
     print(Style.RESET_ALL)
 
 
-def _usage():
-    """Print the usage message."""
-    msg = "Usage:  search.py [options] producer-name mp3-path\n"
-    msg += __doc__ + "\n"
-    msg += "Options:\n"
-    msg += "%5s,\t%s==%s\n" % (
-        "-p", "--producer-name",
-        "the producer you're searching for"
-    )
-    msg += "%5s,\t%s==%s\n" % (
-        "-m", "--mp3-path",
-        "directory where your mp3s live"
-    )
-    msg += "%5s,\t%s==%s\n" % (
-        "-i", "--itunes-library-xml",
-        "Absolute path to iTunes library XML file (overrides mp3_path)"
-    )
-    msg += "%5s,\t%s==\t%s" % (
-        "-h", "--help",
-        "display this help and exit"
-    )
-
-    print(msg)
-
-
 def create_playlist(playlist_name):
     """Create a playlist."""
     fp = open(playlist_name + '.m3u', 'a+')
     fp.write(FORMAT_DESCRIPTOR + '\n')
     fp.close()
 
+
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        _usage()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description='Searches a directory of MP3s and creates a playlist based on producer.'
+    )
+    parser.add_argument(
+        '-p',
+        metavar='Producers',
+        type=str,
+        required=True,
+        help='The producer(s) you\'re searching for. Pipe delimited for multiple'
+    )
+    parser.add_argument(
+        '-m',
+        metavar='MP3 folder path',
+        type=str,
+        default='.',
+        help='Absolute directory path to MP3s. (Default = current directory)'
+    )
+    parser.add_argument(
+        '-i',
+        metavar='iTunes Library',
+        type=str,
+        required=False,
+        help='Absolute path to iTunes Library XML file. If provided, will override -m'
+    )
 
-    options = 'pmi'
-    long_options = ['producer-name', 'mp3-path', 'itunes-library-xml']
+    args = parser.parse_args()
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], options, long_options)
-    except getopt.GetoptError:
-        _usage()
-        sys.exit(1)
+    target_producers = args.p
+    producer_list = target_producers.split('|')
+    mp3_path = Path(args.m)
 
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            _usage()
-            sys.exit(1)
-
-    try:
-        target_producers = args[0]
-        producer_list = target_producers.split('|')
-    except:
-        pass
-
-    try:
-        mp3_path = Path(args[1])
-    except:
-        pass
-
-    try:
-        itunes_library = Path(args[2])
-    except:
-        pass
-
-    if target_producers is None or mp3_path is None:
-        _usage()
-        sys.exit(1)
-
-    if itunes_library is None:
+    if Path(args.i) is None:
         if not mp3_path.is_dir():
             raise Exception('mp3_path is not a directory')
             sys.exit(1)
         else:
             mp3_path = os.path.realpath(mp3_path)
     else:
+        itunes_library = Path(args.i)
         if not itunes_library.is_file():
-            raise Exception('itunes library doesn\'t exist')
+            raise Exception('iTunes library doesn\'t exist')
             sys.exit(1)
         else:
             itunes_library = os.path.realpath(itunes_library)
