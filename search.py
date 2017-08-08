@@ -17,6 +17,7 @@ import string
 import credentials
 from pathlib import Path
 from libpytunes import Library
+from colorama import Fore, Style
 
 token = credentials.auth['token']
 base_url = "https://api.genius.com"
@@ -50,7 +51,7 @@ def search_song(file):
     request = requests.get(search_url, data=data, headers=headers)
     response = request.json()
 
-    print('= Searching for ' + search_term)
+    print(Fore.YELLOW + 'Searching for ' + search_term)
     if response['response']['hits']:
         match = response['response']['hits'][0]
 
@@ -62,8 +63,10 @@ def search_song(file):
             'api_path': match['result']['api_path']
         }
     else:
-        print('= No results found')
+        print(Fore.RED + 'No results found')
         return None
+
+    print(Style.RESET_ALL)
 
 
 def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
@@ -90,7 +93,9 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
                 )
                 break
     else:
-        print('== Couldn\'t find any producers for this track')
+        print(Fore.RED + 'Couldn\'t find any producers for this track')
+
+    print(Style.RESET_ALL)
 
 
 def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name):
@@ -101,13 +106,15 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
 
     entry = RECORD_MARKER + ":" + str(track_length) + "," + artist + " - " + track_name
     if entry not in open(playlist_name + '.m3u').read():
-        print('== Adding ' + track_name + ' to ' + playlist_name)
+        print(Fore.GREEN + 'Adding ' + track_name + ' to ' + playlist_name)
         fp = open(playlist_name + '.m3u', 'a+')
         fp.write(entry + "\n")
         fp.write(mp3_path + "\n")
         fp.close()
     else:
-        print('== Skipping... ' + track_name + ' exists in playlist')
+        print(Fore.BLUE + 'Skipping... ' + track_name + ' exists in playlist')
+
+    print(Style.RESET_ALL)
 
 
 def _usage():
@@ -193,9 +200,9 @@ if __name__ == "__main__":
         else:
             itunes_library = os.path.realpath(itunes_library)
 
-    print('Will create playlists for these producers: ', target_producers.split('|'))
+    print(Fore.YELLOW + 'Will create playlists for these producers: ', target_producers.split('|'))
     if itunes_library is None:
-        print('Searching through path of MP3s')
+        print(Fore.BLUE + 'Searching through path of MP3s')
         for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
             song_info = search_song(file)
             if song_info is not None:
@@ -207,7 +214,7 @@ if __name__ == "__main__":
                     song_info['mp3_path']
                 )
     else:
-        print('Searching through iTunes library')
+        print(Fore.BLUE + 'Searching through iTunes library')
         l = Library(itunes_library)
         for id, song in l.songs.items():
             if song:
@@ -220,3 +227,5 @@ if __name__ == "__main__":
                         song_info['track_length'],
                         song_info['mp3_path']
                     )
+
+    print(Style.RESET_ALL)
