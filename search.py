@@ -113,11 +113,11 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
     if not playlist.is_file():
         create_playlist(playlist_name)
 
-    entry = RECORD_MARKER + ":" + str(track_length) + "," + artist + " - " + track_name
-    if entry not in open(playlist_name + '.m3u').read():
+    l = str(RECORD_MARKER) + ":" + str(track_length) + "," + str(artist) + " - " + str(track_name)
+    if l not in open(playlist_name + '.m3u').read():
         print(Fore.GREEN + 'Adding ' + track_name + ' to ' + playlist_name)
         fp = open(playlist_name + '.m3u', 'a+')
-        fp.write(entry + "\n")
+        fp.write(l + "\n")
         fp.write(mp3_path + "\n")
         fp.close()
     else:
