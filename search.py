@@ -47,6 +47,9 @@ def search_song(file):
     track_name = audiofile.tag.title
     track_length = math.ceil(audiofile.info.time_secs)
     search_term = str(artist) + ' ' + str(track_name)
+    search_term.replace('[', '(')
+    search_term.replace(']', ')')
+    search_term = search_term.lower()
 
     search_modified = re.search(strip_out_excess_song_info, search_term)
 
