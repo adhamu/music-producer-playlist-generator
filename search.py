@@ -76,9 +76,11 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
 
     if len(response['response']['song']['producer_artists']):
         for producer in response['response']['song']['producer_artists']:
-            result = ([c for c in producer_list if producer['name'].translate(translator) in c.translate(translator)] + [None])[0]
+            producer_name = producer['name'].translate(translator)
+            result = (
+                [c for c in producer_list if producer_name in c.translate(translator)] + [None]
+            )[0]
             if result:
-                print('== ' + result + ' produced ' + track_name + '. Adding to playlist')
                 append_to_playlist(
                     'Produced by ' + result,
                     mp3_path,
@@ -87,8 +89,6 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
                     track_name
                 )
                 break
-            else:
-                print('== Didn\'t match the producer we were searching for')
     else:
         print('== Couldn\'t find any producers for this track')
 
@@ -99,10 +99,15 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
     if not playlist.is_file():
         create_playlist(playlist_name)
 
-    fp = open(playlist_name + '.m3u', 'a+')
-    fp.write(RECORD_MARKER + ":" + str(track_length) + "," + artist + " - " + track_name + "\n")
-    fp.write(mp3_path + "\n")
-    fp.close()
+    entry = RECORD_MARKER + ":" + str(track_length) + "," + artist + " - " + track_name
+    if entry not in open(playlist_name + '.m3u').read():
+        print('== Adding ' + track_name + ' to ' + playlist_name)
+        fp = open(playlist_name + '.m3u', 'a+')
+        fp.write(entry + "\n")
+        fp.write(mp3_path + "\n")
+        fp.close()
+    else:
+        print('== Skipping... ' + track_name + ' exists in playlist')
 
 
 def _usage():
