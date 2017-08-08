@@ -91,13 +91,12 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
         actual_producers = response['response']['song']['producer_artists']
 
         producer_list = [
-            str(producer['name'].translate(translator).lower())
+            str(producer['name'].translate(translator)).lower()
             for producer in actual_producers
         ]
 
         matches = [
-            c.translate(translator).lower()
-            for c in target_producer_list if str(c) in producer_list
+            c for c in target_producer_list if c.translate(translator).lower() in producer_list
         ]
 
         if matches:
