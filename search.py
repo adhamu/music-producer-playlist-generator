@@ -48,7 +48,7 @@ def search_song(file):
     request = requests.get(search_url, data=data, headers=headers)
     response = request.json()
 
-    print('=Searching for ' + search_term)
+    print('= Searching for ' + search_term)
     if response['response']['hits']:
         match = response['response']['hits'][0]
 
@@ -60,7 +60,7 @@ def search_song(file):
             'api_path': match['result']['api_path']
         }
     else:
-        print('=No results found')
+        print('= No results found')
         return None
 
 
@@ -70,10 +70,11 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
     request = requests.get(search_url, data={}, headers=headers)
     response = request.json()
 
+    print('== ' + track_name)
     if len(response['response']['song']['producer_artists']):
         for producer in response['response']['song']['producer_artists']:
             if producer in target_producer:
-                print('==' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
+                print('== ' + producer + ' produced ' + track_name + '. Gonna add it to a playlist')
                 append_to_playlist(
                     'Produced by ' + target_producer,
                     mp3_path,
@@ -83,9 +84,9 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
                 )
                 break
             else:
-                print('==Didn\'t match the producer we were searching for')
+                print('== Didn\'t match the producer we were searching for')
     else:
-        print('==Couldn\'t find the producer for this track')
+        print('== Couldn\'t find any producers for this track')
 
 
 def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name):
@@ -106,16 +107,20 @@ def _usage():
     msg += __doc__ + "\n"
     msg += "Options:\n"
     msg += "%5s,\t%s==%s\n" % (
-        "-p", "--producer-name", "the producer you're searching for"
+        "-p", "--producer-name",
+        "the producer you're searching for"
     )
     msg += "%5s,\t%s==%s\n" % (
-        "-m", "--mp3-path", "directory where your mp3s live"
+        "-m", "--mp3-path",
+        "directory where your mp3s live"
     )
     msg += "%5s,\t%s==%s\n" % (
-        "-i", "--itunes-library-xml", "Absolute path to iTunes library XML file (overrides mp3_path)"
+        "-i", "--itunes-library-xml",
+        "Absolute path to iTunes library XML file (overrides mp3_path)"
     )
     msg += "%5s,\t%s==\t%s" % (
-        "-h", "--help", "display this help and exit"
+        "-h", "--help",
+        "display this help and exit"
     )
 
     print(msg)
