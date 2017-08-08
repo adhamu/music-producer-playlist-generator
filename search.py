@@ -51,7 +51,7 @@ def search_song(file):
     request = requests.get(search_url, data=data, headers=headers)
     response = request.json()
 
-    print(Fore.YELLOW + 'Searching for ' + search_term)
+    print(Fore.YELLOW + 'Searching ' + search_term)
     if response['response']['hits']:
         match = response['response']['hits'][0]
 
