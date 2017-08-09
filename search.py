@@ -76,7 +76,7 @@ def get_song_details_using_id3(mp3_file):
 
 def get_song_details_using_itunes(song):
     """Search song using iTunes library XML."""
-    file_path = os.path.realpath(song.location)
+    file_path = os.path.realpath('/' + song.location)
     artist = str(song.artist)
     if song.album_artist:
         artist = str(song.album_artist)
@@ -174,7 +174,7 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
         fp.write(mp3_path + "\n")
         fp.close()
     else:
-        print(Fore.BLUE + 'Skipping... ' + track_name + ' exists in playlist')
+        print(Fore.BLUE + 'Skipping... ' + track_name + ' exists in ' + playlist_name)
 
 
 def create_playlist(playlist_name):
