@@ -44,7 +44,7 @@ def search_song(file):
     file_path = os.path.realpath(mp3_file)
     audiofile = eyed3.load(mp3_file)
 
-    if not audiofile.tag:
+    if audiofile is None:
         print(Fore.RED + 'Couldn\'t load ID3 tag')
         return None
 
