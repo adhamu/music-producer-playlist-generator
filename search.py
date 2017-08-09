@@ -53,8 +53,7 @@ def get_song_details_using_id3(mp3_file):
     print(
         Fore.YELLOW +
         str(search_term) + ' - ' +
-        str(artist) + '|' +
-        str(track_name) + '|' +
+        str(artist) + ' - ' +
         str(track_length) + 's'
     )
 
@@ -87,8 +86,7 @@ def get_song_details_using_itunes(song):
     print(
         Fore.YELLOW +
         str(search_term) + ' - ' +
-        str(artist) + '|' +
-        str(track_name) + '|' +
+        str(artist) + ' - ' +
         str(track_length) + 's'
     )
 
