@@ -43,6 +43,11 @@ def search_song(file):
     mp3_file = file
     file_path = os.path.realpath(mp3_file)
     audiofile = eyed3.load(mp3_file)
+
+    if not audiofile.tag:
+        print(Fore.RED + 'Couldn\'t load ID3 tag')
+        return None
+
     artist = str(audiofile.tag.album_artist) or str(audiofile.tag.artist)
     track_name = str(audiofile.tag.title)
     track_length = math.ceil(audiofile.info.time_secs)
