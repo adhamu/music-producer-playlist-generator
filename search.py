@@ -45,7 +45,9 @@ def get_song_details_using_id3(mp3_file):
         print(Fore.RED + 'Couldn\'t load ID3 tag')
         return None
 
-    artist = str(audiofile.tag.album_artist) or str(audiofile.tag.artist)
+    artist = str(audiofile.tag.artist)
+    if audiofile.tag.album_artist:
+        artist = str(audiofile.tag.album_artist)
     track_name = str(audiofile.tag.title)
     track_length = math.ceil(audiofile.info.time_secs)
     search_term = str(artist) + ' ' + str(track_name)
@@ -75,7 +77,9 @@ def get_song_details_using_id3(mp3_file):
 def get_song_details_using_itunes(song):
     """Search song using iTunes library XML."""
     file_path = os.path.realpath(song.location)
-    artist = str(song.album_artist) or str(song.artist)
+    artist = str(song.artist)
+    if song.album_artist:
+        artist = str(song.album_artist)
     track_name = str(song.name)
     track_length = math.ceil(song.length / 1000)
     search_term = str(artist) + ' ' + str(track_name)
