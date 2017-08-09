@@ -72,8 +72,6 @@ def get_song_details_using_id3(mp3_file):
         print(Fore.RED + 'No results found')
         return None
 
-    print(Style.RESET_ALL)
-
 
 def get_song_details_using_itunes(song):
     """Search song using iTunes library XML."""
@@ -104,8 +102,6 @@ def get_song_details_using_itunes(song):
     else:
         print(Fore.RED + 'No results found')
         return None
-
-    print(Style.RESET_ALL)
 
 
 def search(term):
@@ -177,8 +173,6 @@ def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name
         fp.close()
     else:
         print(Fore.BLUE + 'Skipping... ' + track_name + ' exists in playlist')
-
-    print(Style.RESET_ALL)
 
 
 def create_playlist(playlist_name):
