@@ -16,6 +16,8 @@ import glob
 import string
 import credentials
 import argparse
+import pickle
+import time
 from pathlib import Path
 from libpytunes import Library
 from colorama import Fore, Style
@@ -33,14 +35,9 @@ target_producer_list = None
 mp3_path = None
 itunes_library = None
 
-strip_out_excess_song_info = re.compile(r"^(.*)((\(?.)(ft|feat|prod|bonus))", re.IGNORECASE)
 
-
-def search_song(file):
+def get_song_details_using_id3(mp3_file):
     """Search for tracks and return api path."""
-    search_url = base_url + "/search"
-
-    mp3_file = file
     file_path = os.path.realpath(mp3_file)
     audiofile = eyed3.load(mp3_file)
 
@@ -52,22 +49,18 @@ def search_song(file):
     track_name = str(audiofile.tag.title)
     track_length = math.ceil(audiofile.info.time_secs)
     search_term = str(artist) + ' ' + str(track_name)
-    search_term.replace('[', '(')
-    search_term.replace(']', ')')
-    search_term = search_term.lower()
 
-    search_modified = re.search(strip_out_excess_song_info, search_term)
+    print(
+        Fore.YELLOW +
+        str(search_term) + ' - ' +
+        str(artist) + '|' +
+        str(track_name) + '|' +
+        str(track_length) + 's'
+    )
 
-    if search_modified is not None and search_modified.group(1):
-        search_term = search_modified.group(1)
-
-    data = {'q': search_term}
-    request = requests.get(search_url, data=data, headers=headers)
-    response = request.json()
-
-    print(Fore.YELLOW + 'Searching ' + search_term)
-    if response['response']['hits']:
-        match = response['response']['hits'][0]
+    lookup = search(search_term)
+    if lookup is not None:
+        match = lookup[0]
 
         return {
             'artist': artist,
@@ -81,6 +74,60 @@ def search_song(file):
         return None
 
     print(Style.RESET_ALL)
+
+
+def get_song_details_using_itunes(song):
+    """Search song using iTunes library XML."""
+    file_path = os.path.realpath(song.location)
+    artist = str(song.album_artist) or str(song.artist)
+    track_name = str(song.name)
+    track_length = math.ceil(song.length / 1000)
+    search_term = str(artist) + ' ' + str(track_name)
+
+    print(
+        Fore.YELLOW +
+        str(search_term) + ' - ' +
+        str(artist) + '|' +
+        str(track_name) + '|' +
+        str(track_length) + 's'
+    )
+
+    lookup = search(search_term)
+    if lookup is not None:
+        match = lookup[0]
+
+        return {
+            'artist': artist,
+            'track_name': track_name,
+            'track_length': track_length,
+            'mp3_path': file_path,
+            'api_path': match['result']['api_path']
+        }
+    else:
+        print(Fore.RED + 'No results found')
+        return None
+
+    print(Style.RESET_ALL)
+
+
+def search(term):
+    """Make a search on Genius.com for a song."""
+    search_url = base_url + "/search"
+    term.replace('[', '(')
+    term.replace(']', ')')
+    term = term.lower()
+
+    strip_out_excess_song_info = re.compile(r"^(.*)((\(?.)(ft|feat|prod|bonus))", re.IGNORECASE)
+    search_modified = re.search(strip_out_excess_song_info, term)
+
+    if search_modified is not None and search_modified.group(1):
+        term = search_modified.group(1)
+
+    data = {'q': term}
+    request = requests.get(search_url, data=data, headers=headers)
+    response = request.json()
+
+    return response['response']['hits'] or None
 
 
 def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
@@ -115,8 +162,6 @@ def lookup_song_info(artist, song_api_path, track_name, track_length, mp3_path):
 
     else:
         print(Fore.RED + 'Couldn\'t find any producers for this track')
-
-    print(Style.RESET_ALL)
 
 
 def append_to_playlist(playlist_name, mp3_path, track_length, artist, track_name):
@@ -195,7 +240,7 @@ if __name__ == "__main__":
     if itunes_library is None:
         print(Fore.BLUE + 'Searching through path of MP3s')
         for file in glob.glob(mp3_path + "/**/*.mp3", recursive=True):
-            song_info = search_song(file)
+            song_info = get_song_details_using_id3(file)
             if song_info is not None:
                 lookup_song_info(
                     song_info['artist'],
@@ -206,10 +251,20 @@ if __name__ == "__main__":
                 )
     else:
         print(Fore.BLUE + 'Searching through iTunes library')
-        l = Library(itunes_library)
-        for id, song in l.songs.items():
+        lib_path = itunes_library
+        pickle_file = "itl.p"
+        expiry = 60 * 60
+        epoch_time = int(time.time())
+
+        if not os.path.isfile(pickle_file) or os.path.getmtime(pickle_file) + expiry < epoch_time:
+            itl_source = Library(lib_path)
+            pickle.dump(itl_source, open(pickle_file, "wb"))
+
+        itl = pickle.load(open(pickle_file, "rb"))
+
+        for id, song in itl.songs.items():
             if song:
-                song_info = search_song('/' + song.location)
+                song_info = get_song_details_using_itunes(song)
                 if song_info is not None:
                     lookup_song_info(
                         song_info['artist'],
