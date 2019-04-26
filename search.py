@@ -76,7 +76,7 @@ def get_song_details_using_id3(mp3_file):
 
 def get_song_details_using_itunes(song):
     """Search song using iTunes library XML."""
-    file_path = os.path.realpath('/' + song.location)
+    file_path = os.path.realpath('/' + str(song.location))
     artist = str(song.artist)
     if song.album_artist:
         artist = str(song.album_artist)
