@@ -1,4 +1,4 @@
-colorama==0.3.9
-eyeD3==0.8.7
-requests==2.21.0
-libpytunes.egg==info
+libpytunes==1.5.2
+eyeD3==0.9.5
+colorama==0.4.3
+requests==2.23.0
