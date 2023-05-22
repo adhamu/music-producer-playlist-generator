@@ -1,4 +1,4 @@
 libpytunes==1.5.2
 eyeD3==0.9.5
 colorama==0.4.3
-requests==2.23.0
+requests==2.31.0
